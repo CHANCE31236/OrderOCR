@@ -41,22 +41,14 @@ All screenshots use generated example data. They contain no real customer orders
 - An OpenAI API key with access to a vision-capable model that supports structured outputs
 - For source installation: 64-bit Python 3.11, 3.12, or 3.13
 
-## Quick start
-
-### Use the packaged Windows release
-
-1. Open [GitHub Releases](https://github.com/CHANCE31236/OrderOCR/releases).
-2. Download `OrderOCR-Windows-x64.zip` from the latest release.
-3. Extract the ZIP file to a normal user folder.
-4. Run `OrderOCR.exe`.
-5. Open Settings and enter your OpenAI API key.
-
-### Run from source
+## Install and run
 
 1. Download or clone this repository.
-2. Double-click `install.bat` and wait for installation to finish.
-3. Double-click `start.bat`.
+2. Run `install.bat` and wait for installation to finish.
+3. Run `start.bat`.
 4. Open Settings and enter your OpenAI API key.
+
+Alternatively, download `OrderOCR-Windows-x64.zip` from [GitHub Releases](https://github.com/CHANCE31236/OrderOCR/releases), extract it to a normal user folder, and run `OrderOCR.exe`.
 
 Administrator permissions are not required and are not recommended for normal use.
 
@@ -136,14 +128,16 @@ dist\OrderOCR.exe
 
 Version tags matching `v*` trigger the Windows release workflow, which builds and tests `OrderOCR.exe` before publishing a ZIP archive.
 
-## Contributing
+## Repository
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes. Security-sensitive reports should follow [SECURITY.md](SECURITY.md).
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Changelog](CHANGELOG.md)
 
-Release history is available in [CHANGELOG.md](CHANGELOG.md) and on the [GitHub Releases](https://github.com/CHANCE31236/OrderOCR/releases) page.
+CI runs secret scanning, automated tests, and the source self-test on Windows. Version tags matching `v*` build `OrderOCR.exe` and publish a GitHub Release.
 
 ## License
 
-This repository is not currently licensed as open-source software.
+This repository is not open-source software. Public visibility, if enabled, does not grant a license to use the code.
 
-No permission is granted to copy, modify, redistribute, or use the code commercially unless explicitly authorized by the repository owner. All rights remain with the repository owner unless a license is added later.
+No permission is granted to copy, modify, redistribute, or use the code commercially without explicit authorization from the repository owner.
