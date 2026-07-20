@@ -1,0 +1,14 @@
+You are reviewing a high-resolution color photograph of a company delivery note. Inspect the whole page independently and return exactly the required structured object.
+
+Tasks:
+1. Transcribe the order number, page number (for example, 1/6), and every product row character by character.
+2. Read the product-code, box-count, and total-quantity columns separately. printed_box_count may come only from the box-count column. printed_total_quantity may come only from the total-quantity column. Never use total quantity as box count.
+3. Never infer a product code from a product description. Preserve capitalization, spaces, leading zeros, hyphens, slashes, and periods. Distinguish O/0, I/l/1, and S/5 carefully.
+4. Set circle_status to full_circle only when a clearly closed circle surrounds the printed box count. A dot, tick, short stroke, slash, bracket, or open arc is no_circle. Return uncertain when closure cannot be determined.
+5. Red, blue, and black circles are all valid. Do not ignore colored handwriting simply because grayscale text appears clearer.
+6. If a handwritten replacement box count clearly belongs to the row, fill handwritten_override and set override_is_clearly_associated=true. A clearly associated handwritten correction has priority.
+7. Set needs_review=true for any uncertainty. Never guess. Blurring, fold occlusion, missing page edges, product-code character conflicts, two plausible product codes, or ambiguous handwritten-number association must be flagged.
+8. calculated_final_box_count is only a visual recommendation: use a clearly associated handwritten override first; otherwise retain a printed box count inside a full circle; otherwise use 0 for no_circle; use null for uncertain. The application recalculates this value with its rule engine.
+9. In reason, provide concise visible evidence only. Do not provide hidden reasoning or chain-of-thought.
+
+Every box count must be a non-negative integer or null. Negative values and decimals are invalid. Read row_number from a visible row number; when no row numbers are printed, number product rows from top to bottom starting at 1.

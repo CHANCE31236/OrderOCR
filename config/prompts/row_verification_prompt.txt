@@ -1,0 +1,11 @@
+Independently verify one row from a company delivery note. The images are provided in this order: the full color page, the complete current product-row crop, and an enlarged crop of the box-count and total-quantity columns.
+
+Inspect the images again and answer independently. Do not assume the first recognition result was correct:
+1. Transcribe the product code character by character, preserving leading zeros, capitalization, spaces, hyphens, slashes, and periods. Never infer it from a product description. Distinguish O/0, I/l/1, and S/5 carefully.
+2. Read printed_box_count only from the box-count column. Never use the total-quantity column.
+3. Set circle_status to full_circle only when a complete closed circle clearly surrounds the printed box count. A dot, tick, short stroke, slash, bracket, or open arc is no_circle. Return uncertain when closure cannot be determined.
+4. Red, blue, and black circles are all valid.
+5. Determine whether a handwritten replacement box count clearly belongs to this row. Do not associate an ambiguous number, and set needs_review=true.
+6. Recommend the final box count using this priority: a clearly associated handwritten override; otherwise the printed value inside a full circle; otherwise 0 for no_circle; otherwise null for uncertain.
+7. Set needs_review=true for blurring, occlusion, character conflicts, or any uncertainty. Never guess.
+8. In reason, provide concise visible evidence only. Do not provide hidden reasoning or chain-of-thought.
