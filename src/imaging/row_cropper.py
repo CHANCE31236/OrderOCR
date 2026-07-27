@@ -33,7 +33,8 @@ def crop_rows(color: np.ndarray, gray: np.ndarray, output_dir: str | Path, prefi
 
 
 def crop_box_quantity_columns(row: np.ndarray) -> np.ndarray:
-    """Keep the rightmost 45 percent, covering box-count and quantity columns for verification."""
+    """保留商品行右侧约 45%，通常覆盖“箱”和“数量”两列，供视觉模型放大核验。"""
     start = int(row.shape[1] * 0.55)
     right = row[:, start:]
     return cv2.resize(right, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
+

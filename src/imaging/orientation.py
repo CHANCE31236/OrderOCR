@@ -23,13 +23,14 @@ def rotate_quarter_turn(image: np.ndarray, angle: int) -> np.ndarray:
         return cv2.rotate(image, cv2.ROTATE_180)
     if normalized == 270:
         return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-    raise ValueError("Only 0, 90, 180, and 270 degree rotations are supported")
+    raise ValueError("只支持 0/90/180/270 度旋转")
 
 
 def auto_orient(image: np.ndarray, text_score: Callable[[np.ndarray], float] | None = None) -> tuple[np.ndarray, int]:
-    """Choose orientation by OCR readability, or retain EXIF orientation without OCR."""
+    """用 OCR 可读性选择方向；无 OCR 时仅保持 EXIF 校正后的方向。"""
     if text_score is None:
         return image.copy(), 0
     candidates = [(angle, rotate_quarter_turn(image, angle)) for angle in (0, 90, 180, 270)]
     angle, best = max(candidates, key=lambda item: text_score(item[1]))
     return best, angle
+

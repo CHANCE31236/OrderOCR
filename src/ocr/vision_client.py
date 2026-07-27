@@ -25,7 +25,7 @@ def _read_image(path: str | Path) -> np.ndarray:
     data = np.fromfile(str(path), dtype=np.uint8)
     image = cv2.imdecode(data, cv2.IMREAD_COLOR)
     if image is None:
-        raise VisionError(f"The image is damaged or cannot be read: {path}")
+        raise VisionError(f"图片损坏或无法读取：{path}")
     return image
 
 
@@ -37,14 +37,14 @@ def image_data_url(path: str | Path, max_side: int = 2600, quality: int = 94) ->
         image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
     ok, encoded = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, quality])
     if not ok:
-        raise VisionError(f"Image encoding failed: {path}")
+        raise VisionError(f"图片编码失败：{path}")
     return "data:image/jpeg;base64," + base64.b64encode(encoded.tobytes()).decode("ascii")
 
 
 class VisionClient:
     def __init__(self, api_key: str, settings: dict, cache: JsonCache | None = None) -> None:
         if not api_key:
-            raise VisionError("OPENAI_API_KEY is not configured")
+            raise VisionError("未配置 OPENAI_API_KEY")
         self.settings = settings
         self.client = OpenAI(api_key=api_key, timeout=float(settings.get("api_timeout_seconds", 90)))
         self.cache = cache or JsonCache()
@@ -83,7 +83,7 @@ class VisionClient:
                     )
                     parsed = response.output_parsed
                     if parsed is None:
-                        raise VisionError("The model refused the request or did not return structured output")
+                        raise VisionError("模型拒绝或未返回结构化结果")
                     result = parsed if isinstance(parsed, schema) else schema.model_validate(parsed)
                 else:
                     response = responses.create(
@@ -98,4 +98,4 @@ class VisionClient:
                 last_error = exc
                 if attempt + 1 < attempts:
                     time.sleep(min(16.0, 2.0**attempt))
-        raise VisionError(f"The vision API call failed after {attempts} attempts: {last_error}") from last_error
+        raise VisionError(f"视觉 API 调用失败（已重试 {attempts} 次）：{last_error}") from last_error

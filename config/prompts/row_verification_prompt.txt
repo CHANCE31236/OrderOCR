@@ -1,11 +1,12 @@
-Independently verify one row from a company delivery note. The images are provided in this order: the full color page, the complete current product-row crop, and an enlarged crop of the box-count and total-quantity columns.
+这是公司送货单的单行独立复核。输入依次为：整页彩色图、当前商品整行裁剪图、“箱”和“数量”两列局部放大图。
 
-Inspect the images again and answer independently. Do not assume the first recognition result was correct:
-1. Transcribe the product code character by character, preserving leading zeros, capitalization, spaces, hyphens, slashes, and periods. Never infer it from a product description. Distinguish O/0, I/l/1, and S/5 carefully.
-2. Read printed_box_count only from the box-count column. Never use the total-quantity column.
-3. Set circle_status to full_circle only when a complete closed circle clearly surrounds the printed box count. A dot, tick, short stroke, slash, bracket, or open arc is no_circle. Return uncertain when closure cannot be determined.
-4. Red, blue, and black circles are all valid.
-5. Determine whether a handwritten replacement box count clearly belongs to this row. Do not associate an ambiguous number, and set needs_review=true.
-6. Recommend the final box count using this priority: a clearly associated handwritten override; otherwise the printed value inside a full circle; otherwise 0 for no_circle; otherwise null for uncertain.
-7. Set needs_review=true for blurring, occlusion, character conflicts, or any uncertainty. Never guess.
-8. In reason, provide concise visible evidence only. Do not provide hidden reasoning or chain-of-thought.
+必须重新观察并回答，不得假设第一次识别正确：
+1. 逐字符抄写货号，保留前导零、大小写、空格、横杠、斜杠和小数点；不要根据产品名猜测；严格区分 O/0、I/l/1、S/5。
+2. printed_box_count 只能读取“箱”列，绝不使用“数量”列。
+3. 只有完整闭合且明确包围打印箱数的圈才是 full_circle。点、勾、短线、斜线、括号、不闭合弧线都是 no_circle；看不清闭合情况返回 uncertain。
+4. 红、蓝、黑色圈都有效。
+5. 判断是否存在明确属于本行的手写修正箱数；归属不明确时不要关联，并 needs_review=true。
+6. 最终箱数视觉建议遵循：明确关联手写修正优先；否则完整圈使用打印箱数；no_circle 为 0；uncertain 为 null。
+7. 模糊、遮挡、字符冲突或任何不确定性都必须 needs_review=true，禁止猜测。
+8. reason 只写简短可见证据，不要写思维过程。
+

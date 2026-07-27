@@ -43,7 +43,7 @@ jobs:
         shell: pwsh
         run: >-
           python -m PyInstaller --noconfirm --clean --onefile --windowed
-          --name "OrderOCR" --icon assets/app.ico
+          --name "订单纸单识别器" --icon assets/app.ico
           --add-data "config;config" --add-data "assets;assets"
           --collect-all rapidocr_onnxruntime
           --hidden-import keyring.backends.Windows main.py
@@ -51,7 +51,7 @@ jobs:
       - name: Test packaged OCR runtime
         shell: pwsh
         run: |
-          $exe = Join-Path $PWD "dist\OrderOCR.exe"
+          $exe = Join-Path $PWD "dist\订单纸单识别器.exe"
           $process = Start-Process -FilePath $exe -ArgumentList "--self-test" -WindowStyle Hidden -Wait -PassThru
           if ($process.ExitCode -ne 0) { throw "Packaged self-test failed with exit code $($process.ExitCode)" }
 
@@ -60,7 +60,7 @@ jobs:
         run: |
           $stage = "release\OrderOCR-Windows-x64"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          Copy-Item "dist\OrderOCR.exe" $stage
+          Copy-Item "dist\订单纸单识别器.exe" $stage
           Copy-Item -Recurse config,assets $stage
           Copy-Item README.md,CHANGELOG.md,.env.example $stage
           $archive = Join-Path $PWD "release\OrderOCR-Windows-x64.zip"

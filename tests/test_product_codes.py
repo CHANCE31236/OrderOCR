@@ -16,7 +16,7 @@ def test_product_code_is_preserved_character_for_character(code):
         circle_confidence=1.0,
         overall_confidence=1.0,
         needs_review=False,
-        reason="Clear",
+        reason="清晰",
     )
     assert row.product_code == code
 
@@ -25,3 +25,4 @@ def test_product_code_is_preserved_character_for_character(code):
 def test_empty_or_control_character_product_codes_are_rejected(code):
     with pytest.raises(ValueError):
         validate_product_code(code)
+

@@ -1,1 +1,1 @@
-"""Desktop user interface."""
+"""桌面界面。"""

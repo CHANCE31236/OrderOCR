@@ -12,7 +12,7 @@ def _configure_frozen_path() -> None:
 
 
 def _self_test() -> int:
-    """Validate OpenCV, RapidOCR, business rules, and packaged resources."""
+    """供打包验收使用：验证 exe 内的 OpenCV、RapidOCR、规则和资源文件。"""
     import cv2
     import numpy as np
 
@@ -23,12 +23,12 @@ def _self_test() -> int:
     image = np.full((180, 850, 3), 255, np.uint8)
     cv2.putText(image, "00001535  10", (30, 115), cv2.FONT_HERSHEY_SIMPLEX, 1.7, (0, 0, 0), 3, cv2.LINE_AA)
     if not LocalOCR().recognize(image):
-        raise RuntimeError("The packaged RapidOCR self-test failed")
+        raise RuntimeError("打包后的 RapidOCR 自检失败")
     if calculate_final_quantity(10, "full_circle").final_box_count != 10:
-        raise RuntimeError("The business-rule self-test failed")
+        raise RuntimeError("规则引擎自检失败")
     for required_resource in (resource_path("config", "settings.json"), resource_path("assets", "language.svg")):
         if not required_resource.exists():
-            raise RuntimeError(f"A required resource was not packaged: {required_resource.name}")
+            raise RuntimeError(f"配置资源未打包：{required_resource.name}")
     with tempfile.TemporaryDirectory(prefix="orderocr_selftest_"):
         pass
     return 0
@@ -48,7 +48,7 @@ def main() -> int:
 
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
-    app.setApplicationName("OrderOCR")
+    app.setApplicationName("订单纸单识别器")
     app.setOrganizationName("OrderOCR")
     icon = resource_path("assets", "app.ico")
     if icon.exists():

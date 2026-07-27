@@ -22,7 +22,7 @@ class RowVerifier:
         cache_key: str,
         row_number: int,
     ) -> RowVerification:
-        prompt = f"{self.prompt}\n\nIndependently verify row {row_number}. Do not copy the first recognition result."
+        prompt = f"{self.prompt}\n\n当前需要独立复核第 {row_number} 行。不要复制第一次识别结论。"
         return self.client.structured_image_call(
             model=self.model,
             prompt=prompt,
@@ -31,3 +31,4 @@ class RowVerifier:
             cache_key=cache_key,
             detail="high",
         )
+

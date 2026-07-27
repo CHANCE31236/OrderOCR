@@ -33,7 +33,7 @@ class SettingsStore:
             "output_directory": str(default_output_dir()),
             "api_retry_count": 4,
             "max_concurrency": 2,
-            "language": "en",
+            "language": "zh_CN",
             "api_timeout_seconds": 90,
             "verify_all_rows": True,
             "auto_delete_task_images": False,
@@ -71,7 +71,7 @@ class SettingsStore:
         for env_path in (Path.cwd() / ".env", resource_path(".env")):
             if env_path.exists():
                 value = dotenv_values(env_path).get("OPENAI_API_KEY")
-                if value and not str(value).startswith("enter_"):
+                if value and not str(value).startswith("请"):
                     return str(value).strip()
         try:
             return keyring.get_password(SERVICE_NAME, KEY_USERNAME)

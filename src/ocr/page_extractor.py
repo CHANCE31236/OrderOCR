@@ -15,7 +15,7 @@ class PageExtractor:
         self.prompt = resource_path("config", "prompts", "page_extraction_prompt.txt").read_text(encoding="utf-8")
 
     def extract(self, page_path: str | Path, image_hash: str, local_ocr: list[dict]) -> PageExtraction:
-        prompt = self.prompt + "\n\nLocal OCR hints for positioning only; when they conflict, trust the image:\n" + json.dumps(local_ocr, ensure_ascii=False)
+        prompt = self.prompt + "\n\n本地 OCR 辅助结果（仅作定位线索，冲突时以图像为准）：\n" + json.dumps(local_ocr, ensure_ascii=False)
         result = self.client.structured_image_call(
             model=self.model,
             prompt=prompt,
@@ -27,3 +27,4 @@ class PageExtractor:
         for row in result.rows:
             row.source_image = str(page_path)
         return result
+

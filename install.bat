@@ -1,11 +1,12 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-where py >nul 2>nul || (echo [ERROR] Python was not found. Install Python 3.11, 3.12, or 3.13.& pause & exit /b 1)
-py -3.11 -c "import sys; assert (3,11) <= sys.version_info < (3,14)" >nul 2>nul || (echo [ERROR] Python 3.11 to 3.13 is required. Python 3.11 is recommended.& pause & exit /b 1)
-if not exist .venv py -3.11 -m venv .venv || (echo [ERROR] Failed to create the virtual environment.& pause & exit /b 1)
+where py >nul 2>nul || (echo [错误] 未找到 Python。请安装 Python 3.11 或 3.12。& pause & exit /b 1)
+py -3.11 -c "import sys; assert (3,11) <= sys.version_info < (3,14)" >nul 2>nul || (echo [错误] 需要 Python 3.11 到 3.13，推荐 3.11。& pause & exit /b 1)
+if not exist .venv py -3.11 -m venv .venv || (echo [错误] 创建虚拟环境失败。& pause & exit /b 1)
 call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt || (echo [ERROR] Dependency installation failed. Check your network connection.& pause & exit /b 1)
-echo Installation completed.
+python -m pip install -r requirements.txt || (echo [错误] 依赖安装失败，请检查网络。& pause & exit /b 1)
+echo 安装完成。
 pause
+

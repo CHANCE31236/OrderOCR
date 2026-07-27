@@ -3,10 +3,10 @@
   "verification_model": "gpt-5.4-mini",
   "minimum_confidence": 0.90,
   "save_row_crops": true,
-  "output_directory": "C:\\Users\\Utilisateur\\Desktop\\OrderExcel",
+  "output_directory": "C:\\Users\\Utilisateur\\Desktop\\订单Excel",
   "api_retry_count": 4,
   "max_concurrency": 2,
-  "language": "en",
+  "language": "zh_CN",
   "api_timeout_seconds": 90,
   "verify_all_rows": true,
   "auto_delete_task_images": false

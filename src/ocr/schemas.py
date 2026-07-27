@@ -41,9 +41,9 @@ class RowObservation(StrictModel):
     @classmethod
     def product_code_must_be_literal_and_nonempty(cls, value: str) -> str:
         if not value or not value.strip():
-            raise ValueError("The product code cannot be empty")
+            raise ValueError("货号不能为空")
         if any(ord(ch) < 32 for ch in value):
-            raise ValueError("The product code contains control characters")
+            raise ValueError("货号包含控制字符")
         return value
 
 
@@ -60,7 +60,7 @@ class PageExtraction(StrictModel):
     @classmethod
     def order_number_not_blank(cls, value: str) -> str:
         if not value or not value.strip():
-            raise ValueError("The order number cannot be empty")
+            raise ValueError("订单号不能为空")
         return value.strip()
 
 
@@ -82,7 +82,7 @@ class RowVerification(StrictModel):
     @classmethod
     def product_code_not_blank(cls, value: str) -> str:
         if not value or not value.strip():
-            raise ValueError("The product code cannot be empty")
+            raise ValueError("货号不能为空")
         return value
 
 
@@ -101,5 +101,6 @@ class ReviewedRow(StrictModel):
     final_box_count: NonNegativeInt | None = None
     needs_review: bool = True
     manually_confirmed: bool = False
-    status: str = "manual_review_required"
+    status: str = "需要人工确认"
     review_reason: str = ""
+

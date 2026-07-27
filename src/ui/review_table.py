@@ -13,7 +13,7 @@ class ReviewTable(QTableWidget):
     HEADER_KEYS = ["row_number", "product_code", "printed_boxes", "circle_status", "handwritten", "final_boxes", "code_confidence", "circle_confidence", "status", "reason"]
     EDITABLE = {1, 2, 3, 4, 5}
 
-    def __init__(self, language: str = "en", parent=None) -> None:
+    def __init__(self, language: str = "zh_CN", parent=None) -> None:
         super().__init__(0, len(self.HEADER_KEYS), parent)
         self.language = normalize_language(language)
         self.setHorizontalHeaderLabels([translate(self.language, key) for key in self.HEADER_KEYS])
@@ -42,7 +42,7 @@ class ReviewTable(QTableWidget):
         return CircleStatus(label)
 
     def _status_label(self, status: str) -> str:
-        key = {"manual_review_required": "status_review", "check_recommended": "status_check", "auto_confirmed": "status_auto", "manually_confirmed": "status_manual"}.get(status)
+        key = {"需要人工确认": "status_review", "建议检查": "status_check", "已自动确认": "status_auto", "人工已确认": "status_manual"}.get(status)
         return translate(self.language, key) if key else status
 
     def set_rows(self, rows: list[ReviewedRow]) -> None:
@@ -63,7 +63,7 @@ class ReviewTable(QTableWidget):
                 self._status_label(row.status),
                 row.review_reason,
             ]
-            color = QColor("#d96c6c") if row.status == "manual_review_required" else QColor("#d6b95f") if row.status == "check_recommended" else QColor("#72c98f")
+            color = QColor("#d96c6c") if row.status == "需要人工确认" else QColor("#d6b95f") if row.status == "建议检查" else QColor("#72c98f")
             for column, value in enumerate(values):
                 item = QTableWidgetItem(str(value))
                 if column not in self.EDITABLE:
@@ -90,7 +90,7 @@ class ReviewTable(QTableWidget):
             return None
         value = int(text)
         if value < 0:
-            raise ValueError("The box count cannot be negative")
+            raise ValueError("箱数不能为负数")
         return value
 
     def _on_item_changed(self, item: QTableWidgetItem) -> None:
@@ -113,8 +113,8 @@ class ReviewTable(QTableWidget):
                 model.final_box_count = self._optional_int(item.text())
             model.needs_review = True
             model.manually_confirmed = False
-            model.status = "manual_review_required"
-            model.review_reason = "The manual edit is waiting for confirmation"
+            model.status = "需要人工确认"
+            model.review_reason = "人工修改后等待确认"
             self.row_edited.emit({"row_index": row_index, "before": before, "after": model.model_dump(mode="json")})
         except (ValueError, TypeError):
             self.set_rows(self._rows)

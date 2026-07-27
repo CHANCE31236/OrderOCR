@@ -30,15 +30,15 @@ def reconcile_row(first: RowObservation, second: RowVerification | None, minimum
         )
         if not fields_match or second_decision.final_box_count != decision.final_box_count:
             needs_review = True
-            reasons.append("The two recognition results do not match")
+            reasons.append("两次识别结果不一致")
         if second.needs_review or second.overall_confidence < minimum_confidence:
             needs_review = True
-            reasons.append("The independent verification confidence is too low")
+            reasons.append("二次复核置信度不足")
 
     if needs_review:
-        status = "manual_review_required" if decision.needs_review or (second is not None and "The two recognition results do not match" in reasons) else "check_recommended"
+        status = "需要人工确认" if decision.needs_review or (second is not None and "两次识别结果不一致" in reasons) else "建议检查"
     else:
-        status = "auto_confirmed"
+        status = "已自动确认"
     return ReviewedRow(
         observation=first,
         verification=second,
@@ -46,5 +46,6 @@ def reconcile_row(first: RowObservation, second: RowVerification | None, minimum
         needs_review=needs_review,
         manually_confirmed=False,
         status=status,
-        review_reason="; ".join(dict.fromkeys(reasons)),
+        review_reason="；".join(dict.fromkeys(reasons)),
     )
+

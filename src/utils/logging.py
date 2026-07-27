@@ -12,8 +12,8 @@ SECRET_PATTERN = re.compile(r"sk-[A-Za-z0-9_-]{10,}")
 
 class RedactingFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        record.msg = SECRET_PATTERN.sub("[API key redacted]", str(record.msg))
-        record.args = tuple(SECRET_PATTERN.sub("[API key redacted]", str(v)) for v in record.args)
+        record.msg = SECRET_PATTERN.sub("[API密钥已隐藏]", str(record.msg))
+        record.args = tuple(SECRET_PATTERN.sub("[API密钥已隐藏]", str(v)) for v in record.args)
         return True
 
 
@@ -27,3 +27,4 @@ def configure_logging() -> logging.Logger:
     handler.addFilter(RedactingFilter())
     logger.addHandler(handler)
     return logger
+

@@ -1,1 +1,1 @@
-"""Image-processing services."""
+"""图像处理。"""

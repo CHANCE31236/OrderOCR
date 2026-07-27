@@ -1,1 +1,1 @@
-"""OCR and vision-model services."""
+"""OCR 与视觉模型。"""

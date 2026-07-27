@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$TargetPath,
     [Parameter(Mandatory = $true)][string]$ShortcutPath,
     [string]$WorkingDirectory = "",
-    [string]$Description = "Delivery-note OCR, manual review, and Excel export"
+    [string]$Description = "订单纸单 OCR、人工审核与 Excel 导出"
 )
 
 $source = @"
@@ -53,12 +53,13 @@ public static class UnicodeShortcut {
 
 Add-Type -TypeDefinition $source -Language CSharp
 if (-not (Test-Path -LiteralPath $TargetPath)) {
-    throw "The target application does not exist: $TargetPath"
+    throw "目标程序不存在：$TargetPath"
 }
 if (-not $WorkingDirectory) {
     $WorkingDirectory = Split-Path -Parent $TargetPath
 }
 [UnicodeShortcut]::Create($TargetPath, $ShortcutPath, $WorkingDirectory, $Description)
 if (-not (Test-Path -LiteralPath $ShortcutPath)) {
-    throw "Shortcut creation failed: $ShortcutPath"
+    throw "快捷方式创建失败：$ShortcutPath"
 }
+

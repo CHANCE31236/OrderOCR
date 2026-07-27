@@ -1,1 +1,1 @@
-"""OrderOCR core package."""
+"""订单纸单识别器核心包。"""

@@ -57,7 +57,7 @@ class RecognitionWorker(QThread):
             result = self.pipeline.run(self.paths, lambda done, total, message, calls: self.progress.emit(done, total, message, calls))
             self.completed.emit(result)
         except CancelledError:
-            self.failed.emit("The task was cancelled")
+            self.failed.emit("任务已取消")
         except Exception as exc:
             self.failed.emit(f"{exc}\n\n{traceback.format_exc(limit=4)}")
 
@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
         for key, action in self.toolbar_actions.items():
             action.setText(self.t(key))
         self.language_button.setText(self.t("language"))
-        self.language_button.setToolTip("Language")
+        self.language_button.setToolTip("中文 / English / Français")
         for code, action in self.language_actions.items():
             action.setChecked(code == self.language)
         self.order_label.setText(self.t("orders"))
@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def _on_failed(self, error: str) -> None:
-        self.progress.setFormat("The task failed or was cancelled")
+        self.progress.setFormat("任务失败或已取消")
         self.append_log(error)
         QMessageBox.critical(self, self.t("recognition_incomplete"), error)
 
@@ -361,7 +361,7 @@ class MainWindow(QMainWindow):
         self.corrected_view.set_image(self.current_page.corrected_path)
         self.table.set_rows(self.current_page.reviewed_rows)
         if self.current_page.warnings:
-            self.append_log("; ".join(self.current_page.warnings))
+            self.append_log("；".join(self.current_page.warnings))
 
     def _row_selected(self) -> None:
         row = self.table.current_reviewed_row()
@@ -385,8 +385,8 @@ class MainWindow(QMainWindow):
         before = row.model_dump(mode="json")
         row.needs_review = False
         row.manually_confirmed = True
-        row.status = "manually_confirmed"
-        row.review_reason = "Confirmed by the user in the review interface"
+        row.status = "人工已确认"
+        row.review_reason = "用户已在审核界面确认"
         if self.result:
             self.database.audit(self.result.task_id, "manual_confirm", {"before": before, "after": row.model_dump(mode="json")})
         self.table.refresh_row(self.table.currentRow())
@@ -398,10 +398,10 @@ class MainWindow(QMainWindow):
         threshold = float(self.store.get("minimum_confidence", 0.9))
         count = 0
         for row in self.current_page.reviewed_rows:
-            if row.status == "auto_confirmed" and row.observation.overall_confidence >= threshold:
+            if row.status == "已自动确认" and row.observation.overall_confidence >= threshold:
                 row.needs_review = False
                 row.manually_confirmed = True
-                row.status = "manually_confirmed"
+                row.status = "人工已确认"
                 count += 1
         self.table.set_rows(self.current_page.reviewed_rows)
         self.append_log(self.t("high_confirmed", count=count))

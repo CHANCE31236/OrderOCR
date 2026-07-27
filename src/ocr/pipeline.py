@@ -95,10 +95,10 @@ class RecognitionPipeline:
 
     def _checkpoint(self) -> None:
         if self.cancel_event.is_set():
-            raise CancelledError("The task was cancelled")
+            raise CancelledError("任务已取消")
         self.run_event.wait()
         if self.cancel_event.is_set():
-            raise CancelledError("The task was cancelled")
+            raise CancelledError("任务已取消")
 
     def run(
         self,
@@ -115,14 +115,14 @@ class RecognitionPipeline:
                 path = validate_image_path(raw)
                 digest = sha256_file(path)
                 if digest in seen:
-                    errors.append(f"Skipped duplicate image: {path.name}")
+                    errors.append(f"重复图片已跳过：{path.name}")
                     continue
                 seen.add(digest)
                 unique.append((path, digest))
             except (ValueError, OSError) as exc:
                 errors.append(str(exc))
         if not unique:
-            raise ValueError("There are no valid images to recognize")
+            raise ValueError("没有可识别的有效图片")
 
         key = self.settings_store.get_api_key()
         client = VisionClient(key or "", self.settings)
@@ -135,19 +135,19 @@ class RecognitionPipeline:
             for index, (path, digest) in enumerate(unique, start=1):
                 self._checkpoint()
                 if progress:
-                    progress(index - 1, total, f"Preprocessing {path.name}", client.api_calls)
+                    progress(index - 1, total, f"预处理 {path.name}", client.api_calls)
                 try:
                     page = self._process_page(task_id, path, digest, client, extractor, verifier)
                     processed.append(page)
                     self.database.cache_page(digest, str(path), "completed", page.extraction.model_dump(mode="json"))
                 except CancelledError:
                     raise
-                except Exception as exc:  # A single-page failure must not stop the entire order.
-                    errors.append(f"{path.name}: {exc}")
+                except Exception as exc:  # 单页失败不能终止整单
+                    errors.append(f"{path.name}：{exc}")
                     self.database.cache_page(digest, str(path), "failed", {"error": str(exc)})
                 self.database.save_task(task_id, "running", {"images": [str(p) for p, _ in unique], "completed": index, "errors": errors})
                 if progress:
-                    progress(index, total, f"Completed page {index}/{total}", client.api_calls)
+                    progress(index, total, f"已完成 {index}/{total} 页", client.api_calls)
         except CancelledError:
             self.database.save_task(task_id, "cancelled", {"images": [str(p) for p, _ in unique], "errors": errors})
             raise
@@ -157,15 +157,15 @@ class RecognitionPipeline:
             group = groups.get(page.extraction.order_number)
             if group and group.export_blocked:
                 if group.missing_pages:
-                    page.warnings.append("Missing page(s): " + ", ".join(map(str, group.missing_pages)))
+                    page.warnings.append("缺少第 " + "、".join(map(str, group.missing_pages)) + " 页")
                 if group.duplicate_pages:
-                    page.warnings.append("Duplicate page number(s): " + ", ".join(map(str, group.duplicate_pages)))
+                    page.warnings.append("页码重复：" + "、".join(map(str, group.duplicate_pages)))
                 if group.similar_order_warning:
-                    page.warnings.append("Similar order number(s) require review: " + ", ".join(group.similar_order_warning))
+                    page.warnings.append("相似订单号需确认：" + "、".join(group.similar_order_warning))
                 for row in page.reviewed_rows:
                     row.needs_review = True
-                    row.status = "manual_review_required"
-                    row.review_reason = "; ".join(filter(None, [row.review_reason, *page.warnings]))
+                    row.status = "需要人工确认"
+                    row.review_reason = "；".join(filter(None, [row.review_reason, *page.warnings]))
         status = "completed" if processed else "failed"
         self.database.save_task(task_id, status, {"images": [str(p) for p, _ in unique], "errors": errors, "orders": list(groups)})
         return PipelineResult(task_id, processed, groups, errors, client.api_calls)
@@ -215,16 +215,16 @@ class RecognitionPipeline:
             decision = reconcile_row(row, verification, minimum)
             if row_index in verification_errors:
                 decision.needs_review = True
-                decision.status = "manual_review_required"
-                decision.review_reason += "; independent verification failed: " + verification_errors[row_index]
+                decision.status = "需要人工确认"
+                decision.review_reason += "；二次复核失败：" + verification_errors[row_index]
             if blur_score(prepared.corrected_color) < 60:
                 decision.needs_review = True
-                decision.status = "manual_review_required"
-                decision.review_reason += "; the source image may be blurred"
+                decision.status = "需要人工确认"
+                decision.review_reason += "；原图可能模糊"
             if prepared.page_edge_missing:
                 decision.needs_review = True
-                decision.status = "manual_review_required"
-                decision.review_reason += "; a complete page boundary was not detected"
+                decision.status = "需要人工确认"
+                decision.review_reason += "；未检测到完整纸张边界"
             reviewed.append(decision)
         return ProcessedPage(str(path), digest, str(corrected_path), local, extraction, reviewed)
 

@@ -1,143 +1,127 @@
-# OrderOCR
+# 订单纸单识别器
 
-OrderOCR is a Windows desktop application that converts photographed delivery notes into reviewed Excel files.
+[中文](README.md) · [English](docs/README.en.md) · [Français](docs/README.fr.md)
 
-It corrects document images, groups pages by order, extracts product codes and box counts, highlights uncertain results for manual review, and exports one Excel file per order.
+这是一款支持中文、English、Français 即时切换的 Windows 桌面软件，用于把一批公司纸质送货单照片自动矫正、分组、识别、逐行复核，并在人工审核后导出仅含“货号、箱数”两列的 Excel。软件使用 OpenCV + RapidOCR + OpenAI Responses API 的混合流程；模型输出经过严格 Pydantic 校验，最终箱数由 Python 规则引擎重新计算。
 
-The interface supports English, Chinese, and French.
+## 界面语言
 
-## Screenshot
+点击工具栏上的地球语言图标，可即时选择“中文 / English / Français”。也可以在“设置”的语言下拉框中选择；选择会保存到当前 Windows 用户配置，下一次启动自动沿用。识别到的原始货号、订单号和模型证据不会因为界面语言变化而被改写。
 
-![OrderOCR main interface showing synthetic delivery-note data](assets/screenshots/main-window.png)
+## 安装与启动
 
-All screenshots use generated example data. They contain no real customer orders or personal information.
+系统要求：Windows 10/11、64 位 Python 3.11（也支持 3.12/3.13）、可访问 OpenAI API 的网络。
 
-### Recognition and output examples
+1. 双击 `install.bat`，程序会创建 `.venv` 并安装 PySide6、OpenCV、RapidOCR/ONNX Runtime、OpenAI SDK、openpyxl 等依赖。
+2. 开发方式启动：双击 `start.bat`。
+3. 已打包方式启动：双击 `dist\订单纸单识别器.exe` 或桌面的“订单纸单识别器”快捷方式。
 
-| Recognition results | Manual review |
-| --- | --- |
-| ![OrderOCR recognition results](assets/screenshots/recognition-results.png) | ![OrderOCR manual review](assets/screenshots/manual-review.png) |
+程序不要求管理员权限，支持中文目录。
 
-![Example Excel output generated with synthetic data](assets/screenshots/excel-output.png)
+## API 密钥配置
 
-## Key features
+首次启动会打开中文设置窗口。粘贴 `OPENAI_API_KEY` 并保存；密钥写入当前 Windows 用户的凭据库，不写入项目代码、普通设置文件或日志。
 
-- Import JPG, JPEG, PNG, BMP, TIFF, and WebP document images
-- Automatic rotation, document detection, and perspective correction
-- OCR-assisted extraction of product rows
-- AI-assisted extraction with validated structured results
-- Independent verification of handwritten and circled box counts
-- Manual review for uncertain values
-- Missing-page, duplicate-page, and duplicate-image detection
-- Task recovery and recognition caching with SQLite
-- Excel export with product codes and final box counts
-- Localized interface in English, Chinese, and French
-- No advertising, analytics, or tracking SDKs
+也可以使用下列任一方式：
 
-## Requirements
+- 设置环境变量 `OPENAI_API_KEY`；
+- 复制 `.env.example` 为 `.env` 并填写密钥；`.env` 已被 `.gitignore` 忽略。
 
-- Windows 10 or Windows 11
-- An internet connection for AI-assisted recognition
-- An OpenAI API key with access to a vision-capable model that supports structured outputs
-- For source installation: 64-bit Python 3.11, 3.12, or 3.13
+视觉模型名称只在 `config/settings.json` 或设置窗口中配置。默认值可以按账号当前可用模型调整。程序使用官方 Python SDK 的 Responses API、图片输入和结构化输出。模型必须同时支持图片输入与 Structured Outputs。
 
-## Install and run
+## 完整操作流程
 
-1. Download or clone this repository.
-2. Run `install.bat` and wait for installation to finish.
-3. Run `start.bat`.
-4. Open Settings and enter your OpenAI API key.
+1. 点击“导入图片”，或把 JPG/JPEG/PNG/BMP/TIFF/WebP 拖入窗口。
+2. 点击“开始识别”。程序读取 EXIF、比较四个旋转方向、检测纸张、透视矫正、去噪、阴影校正、增强，同时保留彩色笔迹。
+3. RapidOCR 提供本地文本与位置线索；视觉模型读取整页，提取订单号、页码、商品行、箱列、数量列、圈和手写修正。
+4. 程序按订单号分组并按页码排序。缺页、重复页码或极相似订单号会阻止直接导出。
+5. 每个商品行会保存裁剪图，并用整页图、商品整行图、箱/数量局部放大图独立复核。
+6. 点击表格行，在“商品行放大”标签查看裁剪图。可直接修改货号、原箱数、圈圈状态、手写修正和最终箱数。
+7. 红色行必须检查并点击“确认当前行”；黄色行建议检查；绿色行为两次识别一致的高置信度行。
+8. 点击“导出 Excel”。若有重复货号，软件会警告并要求明确决定；不会自动合并或删除。
+9. Excel 输出到设置中的目录，审核 JSON 输出到其“审核日志”子目录。
 
-Alternatively, download `OrderOCR-Windows-x64.zip` from [GitHub Releases](https://github.com/CHANCE31236/OrderOCR/releases), extract it to a normal user folder, and run `OrderOCR.exe`.
+## 圈圈与箱数规则
 
-Administrator permissions are not required and are not recommended for normal use.
+只读取“箱”列计算最终箱数，绝不把“数量”列当箱数。
 
-The API key is stored in Windows Credential Manager. It is not written to ordinary settings files, logs, or source code. As an alternative for local development, copy `.env.example` to `.env` and enter the key there. The `.env` file is ignored by Git.
+- 有明确属于该行的非负整数手写修正：最终箱数 = 手写修正；
+- 否则，打印箱数被完整闭合圈包围：最终箱数 = 打印箱数；
+- 否则，确认没有完整圈：最终箱数 = 0；
+- 圈是否闭合不确定：最终箱数为未知，必须人工确认。
 
-## How it works
+点、勾、短线、斜线、括号、不闭合弧线都不是完整圈。红、蓝、黑色完整圈均有效。
 
-1. Import delivery-note photos.
-2. Let OrderOCR correct and analyze each page.
-3. Review page grouping and any missing-page warnings.
-4. Inspect uncertain product rows and confirm the final box counts.
-5. Export one Excel file per order.
+## Excel 输出
 
-The spreadsheet contains only two columns: `Product code` and `Box count`. Product codes are stored as text to preserve leading zeros.
+默认目录：`C:\Users\Utilisateur\Desktop\订单Excel`
 
-## Box-count rules
+文件名与订单号完全一致，例如 `Vs20260713-12.xlsx`。工作表只有：
 
-The final box count never comes from the total quantity column.
+| 货号 | 箱数 |
+|---|---:|
+| 00001535 | 5 |
 
-1. A clearly associated non-negative handwritten box override has highest priority.
-2. Otherwise, a printed box count inside a clearly closed circle is kept.
-3. Otherwise, a confirmed absence of a closed circle produces zero.
-4. An uncertain circle blocks automatic export and requires manual review.
+货号强制为文本以保留前导零；箱数为非负整数；首行冻结并带筛选。未确认不确定行、空货号、缺页或无法确定箱数时禁止导出。
 
-Dots, ticks, short strokes, slashes, brackets, and open arcs are not closed circles.
+## 审核日志
 
-## Privacy
+审核日志位于 `C:\Users\Utilisateur\Desktop\订单Excel\审核日志\订单号_review.json`，记录图片文件名与 SHA-256、页码、OCR 结果、两次视觉识别、Python 规则结果、人工修改前后值、最终导出值和置信度。API 密钥不会写入日志。
 
-Images are sent only to the configured OpenAI vision API. The application contains no advertising, analytics, or tracking SDKs.
+## 暂停、恢复与缓存
 
-Do not commit `.env`, API keys, real delivery-note photos, audit logs, customer data, or Excel exports. The repository includes an automated secret scan, but users remain responsible for reviewing files before publishing them.
+- 工具栏支持暂停/继续和取消。
+- 每个页面的已完成结果按图片 SHA-256 缓存，同一照片不会重复调用 API。
+- SQLite 保存任务状态和人工审核事件。意外退出后，下次启动会提示恢复图片列表。
+- “清除缓存”可一键删除识别缓存与裁剪图，不删除已导出的 Excel。
 
-## Limitations
+## 常见错误
 
-Recognition is not guaranteed to be 100% accurate. Blurry images, damaged page edges, layout changes, character conflicts such as O/0, I/l/1 and S/5, uncertain circles, missing pages, and ambiguous handwriting require manual confirmation.
+- **没有 API 密钥**：打开“设置”，粘贴密钥并保存。
+- **无网络、超时或限流**：程序按设置次数指数退避重试；仍失败时该页标记失败，其他页继续。
+- **图片损坏/格式不支持**：该文件被跳过并写入日志。
+- **缺页/重复页码**：补齐或移除错误照片后重新识别。
+- **Excel 正被占用**：关闭 Excel 中同名文件后重试导出。
+- **输出目录无权限**：在设置中选择当前用户可写目录。
+- **本地 OCR 首次较慢**：首次加载 ONNX 模型需要数秒，属于正常现象。
 
-Substantially different delivery-note layouts may reduce row-crop accuracy. Always review highlighted results before exporting or using them in an operational workflow.
+## 测试与重新打包
 
-## Technical details
+运行：
 
-- OpenCV handles orientation scoring, page detection, perspective correction, denoising, and enhancement.
-- RapidOCR and ONNX Runtime provide local text and position hints.
-- The OpenAI Responses API performs image-based extraction and independent row verification.
-- Pydantic validates structured model responses before business rules use them.
-- Python business rules recalculate every final box count.
-- SQLite stores recovery state, audit events, duplicate hashes, and cached results.
-- openpyxl creates the two-column Excel output.
-- PySide6 provides the Windows desktop interface.
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
 
-## Development
-
-Install the development dependencies and run the checks:
+首次参与开发时先安装开发依赖：
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-$env:QT_QPA_PLATFORM='offscreen'
-.\.venv\Scripts\python.exe scripts\check_no_secrets.py
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe main.py --self-test
 ```
 
-To regenerate the README screenshots with synthetic data:
-
-```powershell
-.\.venv\Scripts\python.exe scripts\generate_readme_screenshots.py
-```
-
-## Build
-
-Run `build.bat`. The script installs development dependencies, runs the test suite, builds a one-file executable, copies runtime resources, and creates an English desktop shortcut.
-
-Output:
+双击 `build.bat` 会先运行全部测试，再执行 PyInstaller one-file 打包，复制配置模板并生成桌面快捷方式。输出为：
 
 ```text
-dist\OrderOCR.exe
+C:\Users\Utilisateur\Desktop\OrderOCR\dist\订单纸单识别器.exe
 ```
 
-Version tags matching `v*` trigger the Windows release workflow, which builds and tests `OrderOCR.exe` before publishing a ZIP archive.
+## 隐私说明
 
-## Repository
+照片只发送到设置中指定的 OpenAI 视觉 API，不上传到其他服务；没有广告 SDK、遥测或统计追踪。默认日志不主动提取或记录客户电话和详细地址。请根据公司的数据处理制度配置 API 与本机数据保留策略。
 
-- [Contributing](CONTRIBUTING.md)
-- [Security policy](SECURITY.md)
-- [Changelog](CHANGELOG.md)
+## 已知限制
 
-CI runs secret scanning, automated tests, and the source self-test on Windows. Version tags matching `v*` build `OrderOCR.exe` and publish a GitHub Release.
+- 实际准确率受照片清晰度、纸张遮挡、版式变化、手写风格和所选视觉模型影响，软件不承诺 100% 准确。
+- 低置信度、模糊图片、货号 O/0、I/l/1、S/5 冲突、不确定圈、手写归属不明、页面边缘缺失都需要人工确认。
+- 完全不同的送货单版式可能使本地表格行裁剪偏移；整页模型结果仍会保留，但相关行会要求审核。
+- 没有真实 API 密钥时，可以运行界面和全部离线测试，但不能完成联网视觉识别。
+- 页面按顺序保存以保证 SQLite/审核状态确定性；单页商品行的二次复核会按“单次并发数量”并发执行，并通过缓存减少重复调用。
 
-## License
+## GitHub 仓库
 
-This repository is not open-source software. Public visibility, if enabled, does not grant a license to use the code.
-
-No permission is granted to copy, modify, redistribute, or use the code commercially without explicit authorization from the repository owner.
+- 上传步骤：`docs/GITHUB_UPLOAD.md`
+- 贡献说明：`CONTRIBUTING.md`
+- 安全说明：`SECURITY.md`
+- 推送到 `main` 或打开 Pull Request 时会在 Windows Runner 上运行密钥扫描、36 项测试和源代码自检。
+- 推送 `v*` 标签会构建 Windows one-file 程序、执行打包内 RapidOCR 自检，并创建 GitHub Release。
+- 项目所有者尚未选择开源许可证；公开前请根据希望授予的复用权利添加 `LICENSE`。

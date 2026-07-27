@@ -1,1 +1,1 @@
-"""Shared utilities."""
+"""通用工具。"""

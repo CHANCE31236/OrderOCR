@@ -19,7 +19,7 @@ def observation(code="00001535", **changes):
         circle_confidence=0.98,
         overall_confidence=0.98,
         needs_review=False,
-        reason="Printed box count 10 is surrounded by a closed circle",
+        reason="打印箱数 10 被完整闭合圈包围",
     )
     values.update(changes)
     return RowObservation(**values)
@@ -51,14 +51,15 @@ def test_first_and_second_product_code_conflict_needs_review():
         circle_confidence=0.98,
         overall_confidence=0.95,
         needs_review=False,
-        reason="Independent verification",
+        reason="独立复核",
     )
     reviewed = reconcile_row(first, second, 0.9)
     assert reviewed.needs_review is True
-    assert reviewed.status == "manual_review_required"
-    assert "do not match" in reviewed.review_reason
+    assert reviewed.status == "需要人工确认"
+    assert "不一致" in reviewed.review_reason
 
 
 def test_page_schema_requires_order_number():
     with pytest.raises(ValidationError):
         PageExtraction(order_number=" ", page_number=1, total_pages=1, rows=[])
+

@@ -6,7 +6,7 @@ from pathlib import Path
 from platformdirs import user_config_dir, user_data_dir, user_log_dir
 
 
-APP_NAME = "OrderOCR"
+APP_NAME = "订单纸单识别器"
 APP_SLUG = "OrderOCR"
 
 
@@ -43,6 +43,7 @@ def log_dir() -> Path:
 
 
 def default_output_dir() -> Path:
-    path = Path.home() / "Desktop" / "OrderExcel"
+    path = Path.home() / "Desktop" / "订单Excel"
     path.mkdir(parents=True, exist_ok=True)
     return path
+

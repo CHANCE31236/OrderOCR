@@ -22,31 +22,31 @@ def export_order_excel(
 ) -> Path:
     safe_order_filename(order_number)
     if not rows:
-        raise ExportBlockedError("There are no product rows to export")
+        raise ExportBlockedError("没有可导出的商品行")
     pending = [row.observation.row_number for row in rows if row.needs_review and not row.manually_confirmed]
     if pending:
-        raise ExportBlockedError(f"These rows still require manual confirmation: {pending}")
+        raise ExportBlockedError(f"以下行尚未人工确认：{pending}")
     codes = [validate_product_code(row.observation.product_code) for row in rows]
     duplicates = duplicate_product_codes(codes)
     if duplicates and not allow_duplicates:
-        raise ExportBlockedError("Duplicate product codes require confirmation: " + ", ".join(duplicates))
+        raise ExportBlockedError("发现重复货号，需要用户确认：" + "、".join(duplicates))
     for row in rows:
         if row.final_box_count is None:
-            raise ExportBlockedError(f"The final box count for row {row.observation.row_number} is unknown")
+            raise ExportBlockedError(f"第 {row.observation.row_number} 行最终箱数无法确定")
         if not isinstance(row.final_box_count, int) or isinstance(row.final_box_count, bool) or row.final_box_count < 0:
-            raise ExportBlockedError("The box count must be a non-negative integer")
+            raise ExportBlockedError("箱数必须是非负整数")
 
     directory = Path(output_directory)
     try:
         directory.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
-        raise ExportBlockedError(f"Could not create the output folder: {exc}") from exc
+        raise ExportBlockedError(f"无法创建输出目录：{exc}") from exc
     target = directory / f"{order_number}.xlsx"
     temporary = directory / f".{order_number}.tmp.xlsx"
     workbook = Workbook()
     sheet = workbook.active
-    sheet.title = "Order"
-    sheet.append(["Product code", "Box count"])
+    sheet.title = "订单"
+    sheet.append(["货号", "箱数"])
     for cell in sheet[1]:
         cell.font = Font(bold=True)
     for row in rows:
@@ -62,5 +62,6 @@ def export_order_excel(
         temporary.replace(target)
     except PermissionError as exc:
         temporary.unlink(missing_ok=True)
-        raise ExportBlockedError("The Excel file may be open, or the output folder may not be writable") from exc
+        raise ExportBlockedError("Excel 文件可能正在被占用，或输出目录没有写入权限") from exc
     return target
+

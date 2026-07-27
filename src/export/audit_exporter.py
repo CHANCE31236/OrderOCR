@@ -10,7 +10,7 @@ from src.business.validators import safe_order_filename
 
 def export_audit_log(order_number: str, output_directory: str | Path, payload: dict[str, Any]) -> Path:
     safe_order_filename(order_number)
-    folder = Path(output_directory) / "AuditLogs"
+    folder = Path(output_directory) / "审核日志"
     folder.mkdir(parents=True, exist_ok=True)
     target = folder / f"{order_number}_review.json"
     clean = dict(payload)
@@ -22,3 +22,4 @@ def export_audit_log(order_number: str, output_directory: str | Path, payload: d
     temporary.write_text(json.dumps(clean, ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(target)
     return target
+

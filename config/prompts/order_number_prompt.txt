@@ -1,1 +1,2 @@
-Inspect only the order number and page number near the top of the delivery note. Transcribe every character exactly, preserving capitalization, leading zeros, and hyphens. Pay special attention to O/0, I/l/1, and S/5. If the text is blurred, has two plausible readings, or contains an incomplete page number, set needs_review=true. Never guess. Provide only a short description of visible evidence.
+只检查送货单顶部的订单号与页码。逐字符抄写，保留大小写、前导零和横杠。重点区分 O/0、I/l/1、S/5。若模糊、有两个候选或页码不完整，必须 needs_review=true，禁止猜测，并用简短可见证据说明。
+

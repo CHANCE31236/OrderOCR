@@ -56,6 +56,7 @@ def write_image(path: str | Path, image: np.ndarray, quality: int = 94) -> Path:
     params = [cv2.IMWRITE_JPEG_QUALITY, quality] if suffix in {".jpg", ".jpeg"} else []
     ok, encoded = cv2.imencode(suffix, image, params)
     if not ok:
-        raise OSError(f"Could not encode the image: {target}")
+        raise OSError(f"无法编码图片：{target}")
     encoded.tofile(str(target))
     return target
+

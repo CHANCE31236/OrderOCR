@@ -21,9 +21,9 @@ def make_row(code: str, box: int, *, needs_review: bool = False, confirmed: bool
         circle_confidence=0.99,
         overall_confidence=0.99,
         needs_review=needs_review,
-        reason="Closed circle",
+        reason="完整闭合圈",
     )
-    return ReviewedRow(observation=observation, final_box_count=box, needs_review=needs_review, manually_confirmed=confirmed, status="auto_confirmed")
+    return ReviewedRow(observation=observation, final_box_count=box, needs_review=needs_review, manually_confirmed=confirmed, status="已自动确认")
 
 
 def test_excel_has_only_two_columns_and_preserves_leading_zero(tmp_path: Path):
@@ -31,7 +31,7 @@ def test_excel_has_only_two_columns_and_preserves_leading_zero(tmp_path: Path):
     book = load_workbook(path)
     sheet = book.active
     assert sheet.max_column == 2
-    assert [sheet["A1"].value, sheet["B1"].value] == ["Product code", "Box count"]
+    assert [sheet["A1"].value, sheet["B1"].value] == ["货号", "箱数"]
     assert sheet["A2"].value == "00001535"
     assert isinstance(sheet["A2"].value, str)
     assert sheet["A2"].number_format == "@"
@@ -41,13 +41,13 @@ def test_excel_has_only_two_columns_and_preserves_leading_zero(tmp_path: Path):
 
 
 def test_unreviewed_uncertain_row_is_blocked(tmp_path: Path):
-    with pytest.raises(ExportBlockedError, match="manual confirmation"):
+    with pytest.raises(ExportBlockedError, match="尚未人工确认"):
         export_order_excel("A-1", [make_row("X", 1, needs_review=True)], tmp_path)
 
 
 def test_duplicate_codes_require_explicit_confirmation(tmp_path: Path):
     rows = [make_row("DUP", 1), make_row("DUP", 2)]
-    with pytest.raises(ExportBlockedError, match="Duplicate product codes"):
+    with pytest.raises(ExportBlockedError, match="重复货号"):
         export_order_excel("A-1", rows, tmp_path)
     assert export_order_excel("A-1", rows, tmp_path, allow_duplicates=True).exists()
 
@@ -57,3 +57,4 @@ def test_special_product_code_characters_are_not_changed(tmp_path: Path):
     path = export_order_excel("A-2", [make_row(code, 1) for code in codes], tmp_path)
     sheet = load_workbook(path).active
     assert [sheet.cell(row, 1).value for row in range(2, 5)] == codes
+

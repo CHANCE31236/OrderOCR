@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 
-DEFAULT_LANGUAGE: Final = "en"
+DEFAULT_LANGUAGE: Final = "zh_CN"
 LANGUAGES: Final[dict[str, str]] = {
     "zh_CN": "中文",
     "en": "English",
@@ -208,3 +208,4 @@ def translate(language: str, key: str, **values: object) -> str:
 def join_items(language: str, values: list[object]) -> str:
     separator = "、" if normalize_language(language) == "zh_CN" else ", "
     return separator.join(str(value) for value in values)
+

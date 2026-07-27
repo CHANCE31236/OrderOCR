@@ -1,14 +1,15 @@
-You are reviewing a high-resolution color photograph of a company delivery note. Inspect the whole page independently and return exactly the required structured object.
+你正在审阅公司纸质送货单的高清彩色照片。请独立观察整页，并严格返回指定结构化对象。
 
-Tasks:
-1. Transcribe the order number, page number (for example, 1/6), and every product row character by character.
-2. Read the product-code, box-count, and total-quantity columns separately. printed_box_count may come only from the box-count column. printed_total_quantity may come only from the total-quantity column. Never use total quantity as box count.
-3. Never infer a product code from a product description. Preserve capitalization, spaces, leading zeros, hyphens, slashes, and periods. Distinguish O/0, I/l/1, and S/5 carefully.
-4. Set circle_status to full_circle only when a clearly closed circle surrounds the printed box count. A dot, tick, short stroke, slash, bracket, or open arc is no_circle. Return uncertain when closure cannot be determined.
-5. Red, blue, and black circles are all valid. Do not ignore colored handwriting simply because grayscale text appears clearer.
-6. If a handwritten replacement box count clearly belongs to the row, fill handwritten_override and set override_is_clearly_associated=true. A clearly associated handwritten correction has priority.
-7. Set needs_review=true for any uncertainty. Never guess. Blurring, fold occlusion, missing page edges, product-code character conflicts, two plausible product codes, or ambiguous handwritten-number association must be flagged.
-8. calculated_final_box_count is only a visual recommendation: use a clearly associated handwritten override first; otherwise retain a printed box count inside a full circle; otherwise use 0 for no_circle; use null for uncertain. The application recalculates this value with its rule engine.
-9. In reason, provide concise visible evidence only. Do not provide hidden reasoning or chain-of-thought.
+任务：
+1. 逐字符抄写订单号、页码（如 1/6）和所有商品行。
+2. 对每行分别读取“货号”“箱”“数量”列；printed_box_count 只能来自“箱”列，printed_total_quantity 只能来自“数量”列。绝不能把数量列当箱数。
+3. 货号不能根据产品名称猜测。保留大小写、空格、前导零、横杠、斜杠和小数点；重点区分 O/0、I/l/1、S/5。
+4. 只有打印箱数被一个明确完整闭合的圈包围，circle_status 才是 full_circle。点、勾、短线、斜线、括号、不闭合弧线均是 no_circle。闭合无法判断时返回 uncertain。
+5. 红、蓝、黑色圈都有效。不要因灰度文本更清楚而忽略彩色笔迹。
+6. 若旁边有明确属于该行的手写新箱数，填写 handwritten_override，并仅在关联明确时令 override_is_clearly_associated=true。手写修正优先。
+7. 不确定时必须 needs_review=true；禁止猜测。模糊、折痕遮挡、边缘缺失、货号字符冲突、两种可能货号或手写数字归属不明都必须标记。
+8. calculated_final_box_count 只是视觉建议：明确关联手写修正优先；否则完整圈取原箱数；否则 no_circle 为 0；uncertain 为 null。程序会用规则引擎复算。
+9. 每个判断在 reason 中给出简短可见证据，不要写思维过程。
 
-Every box count must be a non-negative integer or null. Negative values and decimals are invalid. Read row_number from a visible row number; when no row numbers are printed, number product rows from top to bottom starting at 1.
+所有箱数只能是非负整数或 null，不允许负数、小数。row_number 从纸面可见行号读取；若纸面无行号，按商品行自上而下从 1 编号。
+

@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QLabel, QSizePolicy
 
 
 class ImageViewer(QLabel):
-    def __init__(self, placeholder: str = "No image", parent=None) -> None:
+    def __init__(self, placeholder: str = "暂无图片", parent=None) -> None:
         super().__init__(placeholder, parent)
         self._placeholder = placeholder
         self._pixmap = QPixmap()

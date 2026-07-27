@@ -58,7 +58,7 @@ class FakeExtractor:
             circle_confidence=0.99,
             overall_confidence=0.99,
             needs_review=False,
-            reason="5 is surrounded by a closed circle",
+            reason="5 被完整闭合圈包围",
         )
         return PageExtraction(order_number="Vs20260713-12", page_number=1, total_pages=1, rows=[row], page_confidence=0.99)
 
@@ -78,7 +78,7 @@ class FakeVerifier:
             circle_confidence=0.99,
             overall_confidence=0.99,
             needs_review=False,
-            reason="Independent verification confirms a closed circle",
+            reason="独立复核确认完整闭合圈",
         )
 
 
@@ -95,7 +95,7 @@ class TwoRowExtractor(FakeExtractor):
 class OneRowFailsVerifier(FakeVerifier):
     def verify(self, **kwargs):
         if kwargs["row_number"] == 2:
-            raise RuntimeError("Simulated single-row timeout")
+            raise RuntimeError("模拟单行超时")
         return super().verify(**kwargs)
 
 
@@ -143,4 +143,4 @@ def test_one_row_api_failure_does_not_abort_page(tmp_path: Path, monkeypatch):
     assert len(result.pages[0].reviewed_rows) == 2
     failed = result.pages[0].reviewed_rows[1]
     assert failed.needs_review is True
-    assert "independent verification failed" in failed.review_reason
+    assert "二次复核失败" in failed.review_reason

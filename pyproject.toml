@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "order-paper-ocr"
 version = "1.1.0"
-description = "Delivery-note OCR, manual review, and Excel export desktop application"
+description = "订单纸单识别、人工审核与 Excel 导出桌面软件"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
