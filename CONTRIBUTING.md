@@ -4,7 +4,7 @@ Thank you for improving OrderOCR.
 
 ## Local development
 
-1. Install Python 3.11.
+1. Install a 64-bit Python between 3.11 and 3.13 (CI runs 3.11).
 2. Run `install.bat` or create `.venv` manually.
 3. Install development dependencies:
 
@@ -30,5 +30,6 @@ Thank you for improving OrderOCR.
 
 ## Licensing
 
-No open-source license has been selected by the owner yet. A public GitHub repository is still possible, but third parties do not receive reuse rights until the owner adds a license.
+OrderOCR is released under the MIT license (see [LICENSE](LICENSE)). By
+contributing you agree that your contribution is licensed under the same terms.
 

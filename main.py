@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-import tempfile
 from pathlib import Path
 
 
@@ -29,8 +28,6 @@ def _self_test() -> int:
     for required_resource in (resource_path("config", "settings.json"), resource_path("assets", "language.svg")):
         if not required_resource.exists():
             raise RuntimeError(f"A required resource was not packaged: {required_resource.name}")
-    with tempfile.TemporaryDirectory(prefix="orderocr_selftest_"):
-        pass
     return 0
 
 

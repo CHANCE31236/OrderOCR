@@ -138,6 +138,4 @@ CI runs secret scanning, automated tests, and the source self-test on Windows. V
 
 ## License
 
-This repository is not open-source software. Public visibility, if enabled, does not grant a license to use the code.
-
-No permission is granted to copy, modify, redistribute, or use the code commercially without explicit authorization from the repository owner.
+MIT — see [LICENSE](LICENSE).
