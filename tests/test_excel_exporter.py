@@ -57,3 +57,14 @@ def test_special_product_code_characters_are_not_changed(tmp_path: Path):
     path = export_order_excel("A-2", [make_row(code, 1) for code in codes], tmp_path)
     sheet = load_workbook(path).active
     assert [sheet.cell(row, 1).value for row in range(2, 5)] == codes
+
+
+@pytest.mark.parametrize("code", ['=HYPERLINK("https://example.com", "code")', "=1+1", "#N/A", "+ABC", "@ABC"])
+def test_product_codes_are_stored_as_literal_text(tmp_path: Path, code: str):
+    path = export_order_excel("A-3", [make_row(code, 1)], tmp_path)
+    book = load_workbook(path)
+    try:
+        assert book.active["A2"].value == code
+        assert book.active["A2"].data_type == "s"
+    finally:
+        book.close()

@@ -213,6 +213,12 @@ class RecognitionPipeline:
             self._checkpoint()
             verification = verification_by_index.get(row_index)
             decision = reconcile_row(row, verification, minimum)
+            if extraction.needs_review or extraction.page_confidence < minimum:
+                decision.needs_review = True
+                decision.status = "manual_review_required"
+                decision.review_reason += "; the page extraction requires manual review"
+                if extraction.reason:
+                    decision.review_reason += ": " + extraction.reason
             if row_index in verification_errors:
                 decision.needs_review = True
                 decision.status = "manual_review_required"

@@ -1,6 +1,6 @@
 import pytest
 
-from src.business.validators import validate_product_code
+from src.business.validators import safe_order_filename, validate_product_code
 from src.ocr.schemas import RowObservation
 
 
@@ -25,3 +25,14 @@ def test_product_code_is_preserved_character_for_character(code):
 def test_empty_or_control_character_product_codes_are_rejected(code):
     with pytest.raises(ValueError):
         validate_product_code(code)
+
+
+@pytest.mark.parametrize("name", ["CON", "con.txt", "NUL", "AUX", "PRN", "COM1", "LPT9", "COM¹", " ", "A/1", "A."])
+def test_invalid_windows_order_filenames_are_rejected(name):
+    with pytest.raises(ValueError):
+        safe_order_filename(name)
+
+
+@pytest.mark.parametrize("name", ["Vs20260713-12", "CONTRACT-1", "COM10", "订单-1"])
+def test_valid_order_filenames_are_preserved(name):
+    assert safe_order_filename(name) == name

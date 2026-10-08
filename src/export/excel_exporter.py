@@ -51,7 +51,9 @@ def export_order_excel(
         cell.font = Font(bold=True)
     for row in rows:
         sheet.append([row.observation.product_code, row.final_box_count])
-        sheet.cell(sheet.max_row, 1).number_format = "@"
+        product_cell = sheet.cell(sheet.max_row, 1)
+        product_cell.data_type = "s"
+        product_cell.number_format = "@"
         sheet.cell(sheet.max_row, 2).number_format = "0"
     sheet.freeze_panes = "A2"
     sheet.auto_filter.ref = f"A1:B{sheet.max_row}"

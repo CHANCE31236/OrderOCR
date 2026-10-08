@@ -2,6 +2,12 @@
 
 All notable changes are documented here.
 
+## Unreleased
+
+- Store product codes as literal Excel text, including codes starting with formula-like characters.
+- Route rows from uncertain page extraction to manual review before export.
+- Reject reserved Windows device names when building order filenames.
+
 ## 1.1.0 - 2026-07-20
 
 - Added live Chinese, English and French interface switching.
