@@ -2,6 +2,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 from openpyxl import load_workbook
 
 import src.ocr.pipeline as pipeline_module
@@ -97,6 +98,44 @@ class OneRowFailsVerifier(FakeVerifier):
         if kwargs["row_number"] == 2:
             raise RuntimeError("Simulated single-row timeout")
         return super().verify(**kwargs)
+
+
+@pytest.mark.parametrize("needs_review, confidence", [(True, 0.99), (False, 0.5)])
+def test_page_uncertainty_requires_review_before_export(tmp_path: Path, monkeypatch, needs_review, confidence):
+    class UncertainPageExtractor(FakeExtractor):
+        def extract(self, *args):
+            page = super().extract(*args)
+            page.needs_review = needs_review
+            page.page_confidence = confidence
+            page.reason = "The order heading is uncertain"
+            return page
+
+    image_path = tmp_path / "page.jpg"
+    cv2.imencode(".jpg", np.full((900, 650, 3), 255, np.uint8))[1].tofile(str(image_path))
+    monkeypatch.setattr(pipeline_module, "VisionClient", FakeVisionClient)
+    monkeypatch.setattr(pipeline_module, "PageExtractor", UncertainPageExtractor)
+    monkeypatch.setattr(pipeline_module, "RowVerifier", FakeVerifier)
+    monkeypatch.setattr(pipeline_module, "cache_dir", lambda: tmp_path / "cache")
+    monkeypatch.setattr(pipeline_module, "blur_score", lambda _image: 100)
+    monkeypatch.setattr(pipeline_module, "preprocess_image", lambda *_args: pipeline_module.PreprocessedImage(
+        original_color=np.full((900, 650, 3), 255, np.uint8),
+        corrected_color=np.full((900, 650, 3), 255, np.uint8),
+        enhanced_color=np.full((900, 650, 3), 255, np.uint8),
+        enhanced_gray=np.full((900, 650), 255, np.uint8),
+        rotation_angle=0,
+        perspective_corrected=True,
+        page_edge_missing=False,
+    ))
+    pipeline = RecognitionPipeline(FakeSettings(), Database(tmp_path / "tasks.sqlite3"))
+    pipeline.local_ocr = FakeOCR()
+    result = pipeline.run([str(image_path)])
+    row = result.pages[0].reviewed_rows[0]
+    assert row.needs_review is True
+    assert row.status == "manual_review_required"
+    assert "page extraction requires manual review" in row.review_reason
+    from src.export.excel_exporter import ExportBlockedError
+    with pytest.raises(ExportBlockedError, match="manual confirmation"):
+        export_order_excel(result.pages[0].extraction.order_number, [row], tmp_path / "excel")
 
 
 def test_mocked_photo_to_excel_end_to_end(tmp_path: Path, monkeypatch):

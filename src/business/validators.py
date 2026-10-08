@@ -7,6 +7,7 @@ from pathlib import Path
 
 SUPPORTED_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 WINDOWS_INVALID_FILENAME = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+WINDOWS_RESERVED_FILENAME = re.compile(r"^(?:CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)", re.IGNORECASE)
 
 
 def validate_product_code(value: str) -> str:
@@ -27,10 +28,12 @@ def validate_image_path(path: str | Path) -> Path:
 
 
 def safe_order_filename(order_number: str) -> str:
-    if not order_number or WINDOWS_INVALID_FILENAME.search(order_number):
+    if not isinstance(order_number, str) or not order_number.strip() or WINDOWS_INVALID_FILENAME.search(order_number):
         raise ValueError("The order number contains characters that are invalid in a Windows filename")
     if order_number.endswith((".", " ")):
         raise ValueError("The order number cannot end with a period or space")
+    if WINDOWS_RESERVED_FILENAME.match(order_number):
+        raise ValueError("The order number is a reserved Windows device name")
     return order_number
 
 
