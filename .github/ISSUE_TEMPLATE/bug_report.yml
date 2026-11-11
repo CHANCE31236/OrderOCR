@@ -1,0 +1,42 @@
+name: Bug report
+description: Report reproducible incorrect behavior without customer data
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not attach API keys, real delivery notes, addresses, phone numbers or unredacted audit logs."
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "1.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Interface language
+      options: ["中文", "English", "Français"]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use synthetic or fully redacted sample data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
